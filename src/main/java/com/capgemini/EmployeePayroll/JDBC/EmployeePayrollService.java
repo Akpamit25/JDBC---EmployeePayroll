@@ -1,6 +1,7 @@
 package com.capgemini.EmployeePayroll.JDBC;
 
 import java.util.*;
+import databaseConnection.*;
 
 public class EmployeePayrollService {
 	public enum IOService {
@@ -60,5 +61,10 @@ public class EmployeePayrollService {
 		if (ioService.equals(IOService.FILE_IO))
 			this.employeePayrollList = new EmployeePayrollFileIOService().readData();
 		return employeePayrollList;
+	}
+	public List<EmployeePayrollData> readEmployeePayrollData(IOService ioService) {
+		if(ioService.equals(IOService.DB_IO))
+			this.employeePayrollList = new EmployeePayrollDBService().readData();
+		return this.employeePayrollList;
 	}
 }

@@ -18,7 +18,6 @@ public class EmployeePayrollServiceTest {
 		EmployeePayrollService employeePayrollService;
 		employeePayrollService=new EmployeePayrollService(Arrays.asList(arrayOfEmps));
 		employeePayrollService.writeEmployeePayrollData(IOService.FILE_IO);
-		employeePayrollService.printData(IOService.FILE_IO);
 		long entries=employeePayrollService.countEntries(IOService.FILE_IO);
 		Assert.assertEquals(3,entries);	
 	}
@@ -27,5 +26,12 @@ public class EmployeePayrollServiceTest {
 	public void givenFileOnReadingFileShouldMatchEmployeeCount() {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> entries = employeePayrollService.readPayrollData(IOService.FILE_IO);
+	}
+	
+	@Test
+	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchEmployeeCount() {
+	EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+	List<EmployeePayrollData> employeePayrollData=employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
+	Assert.assertEquals(3,employeePayrollData.size());
 	}
 }
