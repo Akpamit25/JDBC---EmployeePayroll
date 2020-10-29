@@ -36,12 +36,21 @@ public class EmployeePayrollServiceTest {
 	Assert.assertEquals(3,employeePayrollData.size());
 	}
 	
-	@Test
-	public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDB() throws PayrollSystemException {
+	//@Test /*UC3*/
+	/*public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDB() throws PayrollSystemException {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
 		employeePayrollService.updateEmployeeSalary("Amit",20000.0);
 		boolean result=employeePayrollService.checkEmployeePayrollInSyncWithDB("Amit");
+		Assert.assertTrue(result);} */
+	
+	@Test
+	public void givenNewSalaryForEmployee_WhenUpdatedUsingPreparedStatement_ShouldSyncWithDB() /*UC4*/
+			throws PayrollSystemException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
+		employeePayrollService.updateEmployeeSalary("Amit", 300000.0);
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Amit");
 		Assert.assertTrue(result);
 	}
 }
