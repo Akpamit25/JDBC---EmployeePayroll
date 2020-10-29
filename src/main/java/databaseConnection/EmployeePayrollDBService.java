@@ -9,7 +9,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import com.capgemini.EmployeePayroll.JDBC.*;
 
 public class EmployeePayrollDBService {
@@ -135,5 +138,21 @@ public class EmployeePayrollDBService {
 			e.printStackTrace();
 		}
 		return employeePayrollList;
+	}
+	public Map<String, Double> getAverageSalaryByGender() {
+		String sql = "SELECT gender,AVG(salary) as avg_salary FROM employeepayroll group by gender;";
+		Map<String, Double> genderToAverageSalaryMap = new HashMap<>();
+		try (Connection connection = this.getConnection()) {
+			Statement statement = connection.createStatement();
+			ResultSet result = statement.executeQuery(sql);
+			while (result.next()) {
+				String gender = result.getString("gender");
+				double salary = result.getDouble("avg_salary");
+				genderToAverageSalaryMap.put(gender, salary);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return genderToAverageSalaryMap;
 	}
 }

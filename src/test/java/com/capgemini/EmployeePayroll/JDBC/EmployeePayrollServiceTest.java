@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import exception.PayrollSystemException;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import com.capgemini.EmployeePayroll.JDBC.EmployeePayrollService.IOService;
@@ -65,5 +67,18 @@ public class EmployeePayrollServiceTest {
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService
 				.readEmployeePayrollForDateRange(IOService.DB_IO, startDate, endDate);
 		Assert.assertEquals(3, employeePayrollData.size());
+	}
+	
+	/*UC6*/
+
+	@Test
+	public void findSumAverageMinMaxCount_ofEmployees_ShouldMatchEmployeeCount() throws PayrollSystemException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
+		Map<String, Double> genderToAverageSalaryMap = employeePayrollService.getAvgSalary(IOService.DB_IO);
+		Double avgSalaryMale = 165000.0;
+		Assert.assertEquals(avgSalaryMale, genderToAverageSalaryMap.get("Male"));
+		Double avgSalaryFemale = 20000.0;
+		Assert.assertEquals(avgSalaryFemale, genderToAverageSalaryMap.get("Female"));
 	}
 }
