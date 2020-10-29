@@ -13,6 +13,7 @@ public class EmployeePayrollData {
 		this.id = id;
 		this.name = name;
 		this.salary = salary;
+
 	}
 
 	public EmployeePayrollData(int id, String name, double salary, LocalDate startDate) {

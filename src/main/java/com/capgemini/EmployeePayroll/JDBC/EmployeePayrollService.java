@@ -2,6 +2,7 @@ package com.capgemini.EmployeePayroll.JDBC;
 
 import java.util.*;
 import databaseConnection.*;
+import exception.PayrollSystemException;
 
 public class EmployeePayrollService {
 	public enum IOService {
@@ -9,12 +10,15 @@ public class EmployeePayrollService {
 	}
 
 	private List<EmployeePayrollData> employeePayrollList;
+	private EmployeePayrollDBService employeePayrollDBService;
 
 	public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
+		this();
 		this.employeePayrollList = employeePayrollList;
 	}
 
 	public EmployeePayrollService() {
+		employeePayrollDBService=EmployeePayrollDBService.getInstance();
 	}
 
 	private void readEmployeePayrollData(Scanner consoleInputReader) {
@@ -56,15 +60,37 @@ public class EmployeePayrollService {
 		}
 		return 0;
 	}
-	
+
 	public List<EmployeePayrollData> readPayrollData(IOService ioService) {
 		if (ioService.equals(IOService.FILE_IO))
 			this.employeePayrollList = new EmployeePayrollFileIOService().readData();
 		return employeePayrollList;
 	}
+
 	public List<EmployeePayrollData> readEmployeePayrollData(IOService ioService) {
-		if(ioService.equals(IOService.DB_IO))
-			this.employeePayrollList = new EmployeePayrollDBService().readData();
+		if (ioService.equals(IOService.DB_IO))
+			this.employeePayrollList = employeePayrollDBService.readData();
 		return this.employeePayrollList;
+	}
+
+	public void updateEmployeeSalary(String name, double salary) throws PayrollSystemException {
+		int result = employeePayrollDBService.updateEmployeeData(name, salary);
+		if (result == 0) {
+			throw new PayrollSystemException("no rows updated",
+					PayrollSystemException.ExceptionType.UPDATE_FILE_EXCEPTION);
+		}
+		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
+		if (employeePayrollData != null)
+			employeePayrollData.salary = salary;
+	}
+
+	private EmployeePayrollData getEmployeePayrollData(String name) {
+		return this.employeePayrollList.stream().filter(empPayrollDataItem -> empPayrollDataItem.name.equals(name))
+				.findFirst().orElse(null);
+	}
+
+	public boolean checkEmployeePayrollInSyncWithDB(String name) {
+		List<EmployeePayrollData> employeePayrollDataList=employeePayrollDBService.getEmployeePayrollData(name);
+		return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
 	}
 }

@@ -1,6 +1,7 @@
 package com.capgemini.EmployeePayroll.JDBC;
 
 import java.util.Arrays;
+import exception.PayrollSystemException;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,5 +34,14 @@ public class EmployeePayrollServiceTest {
 	EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 	List<EmployeePayrollData> employeePayrollData=employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
 	Assert.assertEquals(3,employeePayrollData.size());
+	}
+	
+	@Test
+	public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDB() throws PayrollSystemException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
+		employeePayrollService.updateEmployeeSalary("Amit",20000.0);
+		boolean result=employeePayrollService.checkEmployeePayrollInSyncWithDB("Amit");
+		Assert.assertTrue(result);
 	}
 }
