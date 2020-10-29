@@ -63,6 +63,20 @@ public class EmployeePayrollDBService {
 		}
 		return 0;
 	}
+	
+	public int updateEmployeeDataUsingPreparedStatement(String name, double salary) {  /*UC-4*/
+		try (Connection connection = this.getConnection();) {
+			String sql = "update employeepayroll set salary=? where employeename=?";
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setDouble(1, salary);
+			preparedStatement.setString(2, name);
+			int status = preparedStatement.executeUpdate();
+			return status;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 	public List<EmployeePayrollData> getEmployeePayrollData(String name) {
 		List<EmployeePayrollData> employeeParollList = null;
