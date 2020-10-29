@@ -1,18 +1,9 @@
 package databaseConnection;
 
-import java.sql.Connection;
+import java.sql.*;
 import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 import com.capgemini.EmployeePayroll.JDBC.*;
 
 public class EmployeePayrollDBService {
@@ -43,29 +34,11 @@ public class EmployeePayrollDBService {
 	public List<EmployeePayrollData> readData() {
 		String sql = "SELECT * FROM employeepayroll; ";
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		try (Connection connection = this.getConnection();) {
-			Statement statement = connection.createStatement();
-			ResultSet result = statement.executeQuery(sql);
-			employeePayrollList=this.getEmployeePayrollData(result);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return employeePayrollList;
+		return this.getEmployeePayrollDataUsingDB(sql);
 	}
 
 	public int updateEmployeeData(String name, double salary) {
-		return this.updateEmployeeDataUsingStatement(name, salary);
-	}
-
-	private int updateEmployeeDataUsingStatement(String name, double salary) {
-		String sql = String.format("update employeepayroll set salary=%.2f where employeename='%s';", salary, name);
-		try (Connection connection = this.getConnection();) {
-			Statement statement = connection.createStatement();
-			return statement.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return 0;
+		return this.updateEmployeeDataUsingPreparedStatement(name, salary);
 	}
 	
 	public int updateEmployeeDataUsingPreparedStatement(String name, double salary) {  /*UC-4*/
@@ -194,14 +167,39 @@ public class EmployeePayrollDBService {
 					"INSERT INTO payroll_details (id,basic_pay,deductions,taxable_pay,tax,net_pay)" + ""
 							+ "VALUES('%s','%s','%s','%s','%s','%s')",
 					employeeId, salary, deductions, taxable_pay, tax, net_pay);
-			int rowAffected = statement.executeUpdate(sql);
-			if (rowAffected == 1) {
+			statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		}
+		try (Statement statement = connection.createStatement()) {
+			int dept_id = 105;
+			String dept_name = "Finance";
+			String sql = String.format("INSERT INTO department (dept_id,dept_name) VALUES('%s','%s')", dept_id,
+					dept_name);
+			statement.executeUpdate(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try (Statement statement = connection.createStatement()) {
+			int dept_id1 = 105;
+			String sql1 = String.format("INSERT INTO emp_dept (id,dept_id) VALUES('%s','%s')", employeeId, dept_id1);
+			statement.executeUpdate(sql1);
+			int dept_id = 101;
+			String sql = String.format("INSERT INTO emp_dept (id,dept_id) VALUES('%s','%s')", employeeId, dept_id);
+			int rowAffected1 = statement.executeUpdate(sql);
+			if (rowAffected1 == 1) {
 				employeePayrollData = new EmployeePayrollData(employeeId, name, salary, start);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			try {
 				connection.rollback();
+				return employeePayrollData;
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
