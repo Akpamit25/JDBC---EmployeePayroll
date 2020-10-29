@@ -11,6 +11,7 @@ public class EmployeePayrollService {
 	}
 
 	private List<EmployeePayrollData> employeePayrollList;
+	private Map<String, Double> genderToAverageSalaryMap;
 	private EmployeePayrollDBService employeePayrollDBService;
 
 	public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
@@ -19,7 +20,16 @@ public class EmployeePayrollService {
 	}
 
 	public EmployeePayrollService() {
-		employeePayrollDBService=EmployeePayrollDBService.getInstance();
+		employeePayrollDBService = EmployeePayrollDBService.getInstance();
+	}
+
+	public static void main(String[] args) {
+		System.out.println("Welcome to Employee Payroll Service");
+		ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<>();
+		EmployeePayrollService employeePayroll = new EmployeePayrollService(employeePayrollList);
+		Scanner consoleInputReader = new Scanner(System.in);
+		employeePayroll.readEmployeePayrollData(consoleInputReader);
+		employeePayroll.writeEmployeePayrollData(IOService.CONSOLE_IO);
 	}
 
 	private void readEmployeePayrollData(Scanner consoleInputReader) {
@@ -38,15 +48,6 @@ public class EmployeePayrollService {
 		else if (ioService.equals(IOService.FILE_IO)) {
 			new EmployeePayrollFileIOService().writeData(employeePayrollList);
 		}
-	}
-
-	public static void main(String[] args) {
-		System.out.println("Welcome to Employee Payroll Service");
-		ArrayList<EmployeePayrollData> employeePayrollList = new ArrayList<>();
-		EmployeePayrollService employeePayroll = new EmployeePayrollService(employeePayrollList);
-		Scanner consoleInputReader = new Scanner(System.in);
-		employeePayroll.readEmployeePayrollData(consoleInputReader);
-		employeePayroll.writeEmployeePayrollData(IOService.CONSOLE_IO);
 	}
 
 	public void printData(IOService fileIo) {
@@ -75,14 +76,18 @@ public class EmployeePayrollService {
 	}
 
 	public void updateEmployeeSalary(String name, double salary) throws PayrollSystemException {
-		int result = employeePayrollDBService.updateEmployeeData(name, salary);
-		if (result == 0) {
-			throw new PayrollSystemException("no rows updated",
-					PayrollSystemException.ExceptionType.UPDATE_FILE_EXCEPTION);
+		try {
+			int result = employeePayrollDBService.updateEmployeeData(name, salary);
+			if (result == 0) {
+				throw new PayrollSystemException("no rows updated",
+						PayrollSystemException.ExceptionType.UPDATE_FILE_EXCEPTION);
+			}
+			EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
+			if (employeePayrollData != null)
+				employeePayrollData.salary = salary;
+		} catch (PayrollSystemException e) {
+			System.out.println(e);
 		}
-		EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
-		if (employeePayrollData != null)
-			employeePayrollData.salary = salary;
 	}
 
 	private EmployeePayrollData getEmployeePayrollData(String name) {
@@ -91,13 +96,28 @@ public class EmployeePayrollService {
 	}
 
 	public boolean checkEmployeePayrollInSyncWithDB(String name) {
-		List<EmployeePayrollData> employeePayrollDataList=employeePayrollDBService.getEmployeePayrollData(name);
+		List<EmployeePayrollData> employeePayrollDataList = employeePayrollDBService.getEmployeePayrollData(name);
 		return employeePayrollDataList.get(0).equals(getEmployeePayrollData(name));
 	}
+
 	public List<EmployeePayrollData> readEmployeePayrollForDateRange(IOService ioService, LocalDate startDate,
 			LocalDate endDate) {
-		if(ioService.equals(IOService.DB_IO))
-			this.employeePayrollList = employeePayrollDBService.getEmployeeForDateRange(startDate,endDate);
+		if (ioService.equals(IOService.DB_IO))
+			this.employeePayrollList = employeePayrollDBService.getEmployeeForDateRange(startDate, endDate);
 		return this.employeePayrollList;
+	}
+
+	public Map<String, Double> getAvgSalary(IOService ioService) throws PayrollSystemException {
+		try {
+			if (ioService.equals(IOService.DB_IO))
+				this.genderToAverageSalaryMap = employeePayrollDBService.getAverageSalaryByGender();
+			if (genderToAverageSalaryMap.isEmpty()) {
+				throw new PayrollSystemException("no data retrieved",
+						PayrollSystemException.ExceptionType.RETRIEVE_EXCEPTION );
+			}
+		} catch (PayrollSystemException e) {
+			System.out.println(e);
+		}
+		return genderToAverageSalaryMap;
 	}
 }
