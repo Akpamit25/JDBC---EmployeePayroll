@@ -119,20 +119,7 @@ public class EmployeePayrollDBService {
 		String sql = String.format("SELECT e.id,e.employeename,e.startdate,e.gender,e.basic_pay, d.department_name from employeepayroll e inner join "
 				+ "employee_department ed on e.id=ed.employee_id inner join department d on ed.department_id=d.department_id where startdate between '%s' AND '%s';",
 				Date.valueOf(startDateTime), Date.valueOf(endDateTime));
-		return this.getEmployeePayrollDataUsingDB(sql);
-	}
-
-	private List<EmployeePayrollData> getEmployeePayrollDataUsingDB(String sql) {
-		ResultSet result;
-		List<EmployeePayrollData> employeePayrollList = null;
-		try (Connection connection = EmployeePayrollDBService.getConnection()) {
-			Statement statement = connection.createStatement();
-			result = statement.executeQuery(sql);
-			employeePayrollList = this.getEmployeePayrollData(result);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return employeePayrollList;
+		return this.getEmployeePayrollDataUsingQuery(sql);
 	}
 
 	public Map<String, Double> getAverageSalaryByGender() {
@@ -150,5 +137,10 @@ public class EmployeePayrollDBService {
 			e.printStackTrace();
 		}
 		return genderToAverageSalaryMap;
+	}
+	public List<EmployeePayrollData> readActiveEmployeeData() {
+		String sql = "SELECT e.id,e.employeename,e.startdate,e.gender,e.basic_pay, d.department_name from employeepayroll e inner join "
+				+ "employee_department ed on e.id=ed.employee_id inner join department d on ed.department_id=d.department_id where is_active=true; ";
+		return this.getEmployeePayrollDataUsingQuery(sql);
 	}
 }

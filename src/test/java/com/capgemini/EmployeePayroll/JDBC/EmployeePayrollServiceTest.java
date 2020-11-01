@@ -28,12 +28,6 @@ public class EmployeePayrollServiceTest {
 	}
 	
 	@Test
-	public void givenFileOnReadingFileShouldMatchEmployeeCount() {
-		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-		List<EmployeePayrollData> entries = employeePayrollService.readPayrollData(IOService.FILE_IO);
-	}
-	
-	@Test
 	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchEmployeeCount() {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
@@ -79,5 +73,15 @@ public class EmployeePayrollServiceTest {
 		employeePayrollService.addEmployeeToPayroll("Mandy",50000.0,LocalDate.now(),'M');
 		boolean result=employeePayrollService.checkEmployeePayrollInSyncWithDB("Mandy");
 		Assert.assertTrue(result);		
+	}
+	@Test
+	public void givenEmployeeWhenRemoved_ShouldRemainInDatabase() {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
+		int countOfEmployeeRemoved = employeePayrollService.removeEmployeeFromPayroll("Mandy", IOService.DB_IO);
+		Assert.assertEquals(1, countOfEmployeeRemoved);
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService
+				.readActiveEmployeePayrollData(IOService.DB_IO);
+		Assert.assertEquals(4, employeePayrollData.size());
 	}
 }
