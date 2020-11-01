@@ -37,9 +37,8 @@ public class EmployeePayrollServiceTest {
 	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchEmployeeCount() {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
-		Assert.assertEquals(5, employeePayrollData.size());
+		Assert.assertEquals(6, employeePayrollData.size());
 	}
-	
 	
 	@Test
 	public void givenNewSalaryForEmployee_WhenUpdatedUsingPreparedStatement_ShouldSyncWithDB()
@@ -50,8 +49,7 @@ public class EmployeePayrollServiceTest {
 		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Amit");
 		Assert.assertTrue(result);
 	}
-	
-	/*UC5*/
+
 	@Test
 	public void givenDateRange_WhenRetrieved_ShouldMatchEmployeeCount() {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
@@ -60,10 +58,8 @@ public class EmployeePayrollServiceTest {
 		LocalDate endDate = LocalDate.now();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService
 				.readEmployeePayrollForDateRange(IOService.DB_IO, startDate, endDate);
-		Assert.assertEquals(5, employeePayrollData.size());
+		Assert.assertEquals(6, employeePayrollData.size());
 	}
-	
-	/*UC6*/
 
 	@Test
 	public void findSumAverageMinMaxCount_ofEmployees_ShouldMatchEmployeeCount() throws PayrollSystemException {
@@ -75,7 +71,6 @@ public class EmployeePayrollServiceTest {
 		Double avgSalaryFemale = 20000.0;
 		Assert.assertEquals(avgSalaryFemale, genderToAverageSalaryMap.get("F"));
 	}
-	/*UC7*/
 
 	@Test
 	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws PayrollSystemException, SQLException {
@@ -83,11 +78,6 @@ public class EmployeePayrollServiceTest {
 		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
 		employeePayrollService.addEmployeeToPayroll("Mandy",50000.0,LocalDate.now(),'M');
 		boolean result=employeePayrollService.checkEmployeePayrollInSyncWithDB("Mandy");
-		Assert.assertTrue(result);
-		
-	/*UC-8*/
-		/*UC-8  Refactor*/
-
-		
+		Assert.assertTrue(result);		
 	}
 }
