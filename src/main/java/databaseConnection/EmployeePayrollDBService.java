@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.*;
 import com.capgemini.EmployeePayroll.JDBC.*;
 
+import exception.PayrollSystemException;
+
 public class EmployeePayrollDBService {
 	private PreparedStatement employeePayrollDataStatement;
 	private static EmployeePayrollDBService employeePayrollDBService;
@@ -129,7 +131,8 @@ public class EmployeePayrollDBService {
 		return genderToAverageSalaryMap;
 	}
 	
-	public EmployeePayrollData addEmployeeToPayroll(String name, double salary, LocalDate start, char gender) {
+	public EmployeePayrollData addEmployeeToPayroll(String name, double salary, LocalDate start, char gender)
+			throws PayrollSystemException, SQLException {
 		int employeeId = -1;
 		Connection connection = null;
 		EmployeePayrollData employeePayrollData = null;
@@ -149,8 +152,15 @@ public class EmployeePayrollDBService {
 				if (result.next())
 					employeeId = result.getInt(1);
 			}
+			if (rowAffected == 0)
+				throw new PayrollSystemException("insert data into employee table unsuccessful!!!",
+						PayrollSystemException.ExceptionType.INSERT_EXCEPTION);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			connection.rollback();
+			throw new PayrollSystemException("insert data into employee table unsuccessful!!!",
+					PayrollSystemException.ExceptionType.INSERT_EXCEPTION);
+		} catch (PayrollSystemException e2) {
+			e2.printStackTrace();
 			try {
 				connection.rollback();
 				return employeePayrollData;
@@ -158,6 +168,7 @@ public class EmployeePayrollDBService {
 				e1.printStackTrace();
 			}
 		}
+
 		try (Statement statement = connection.createStatement()) {
 			double deductions = salary * 0.2;
 			double taxable_pay = salary - deductions;
@@ -167,40 +178,22 @@ public class EmployeePayrollDBService {
 					"INSERT INTO payroll_details (id,basic_pay,deductions,taxable_pay,tax,net_pay)" + ""
 							+ "VALUES('%s','%s','%s','%s','%s','%s')",
 					employeeId, salary, deductions, taxable_pay, tax, net_pay);
-			statement.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			try {
-				connection.rollback();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-		}
-		try (Statement statement = connection.createStatement()) {
-			int dept_id = 105;
-			String dept_name = "Finance";
-			String sql = String.format("INSERT INTO department (dept_id,dept_name) VALUES('%s','%s')", dept_id,
-					dept_name);
-			statement.executeUpdate(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		try (Statement statement = connection.createStatement()) {
-			int dept_id1 = 105;
-			String sql1 = String.format("INSERT INTO emp_dept (id,dept_id) VALUES('%s','%s')", employeeId, dept_id1);
-			statement.executeUpdate(sql1);
-			int dept_id = 101;
-			String sql = String.format("INSERT INTO emp_dept (id,dept_id) VALUES('%s','%s')", employeeId, dept_id);
-			int rowAffected1 = statement.executeUpdate(sql);
-			if (rowAffected1 == 1) {
+			int rowAffected = statement.executeUpdate(sql);
+			if (rowAffected == 1) {
 				employeePayrollData = new EmployeePayrollData(employeeId, name, salary, start);
 			}
+			if (rowAffected == 0)
+				throw new PayrollSystemException("insert data into payroll table unsuccessful!!!",
+						PayrollSystemException.ExceptionType.INSERT_EXCEPTION);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			connection.rollback();
+			throw new PayrollSystemException("insert data into payroll table unsuccessful!!!",
+					PayrollSystemException.ExceptionType.INSERT_EXCEPTION);
+		} catch (PayrollSystemException e1) {
+			e1.printStackTrace();
 			try {
 				connection.rollback();
-				return employeePayrollData;
-			} catch (SQLException e1) {
+			} catch (SQLException e2) {
 				e1.printStackTrace();
 			}
 		}
