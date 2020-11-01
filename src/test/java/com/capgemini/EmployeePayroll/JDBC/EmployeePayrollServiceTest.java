@@ -1,5 +1,6 @@
 package com.capgemini.EmployeePayroll.JDBC;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import exception.PayrollSystemException;
@@ -84,15 +85,16 @@ public class EmployeePayrollServiceTest {
 	/*UC7*/
 
 	@Test
-	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() {
+	public void givenNewEmployee_WhenAdded_ShouldSyncWithDB() throws PayrollSystemException, SQLException {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		employeePayrollService.readEmployeePayrollData(IOService.DB_IO);
 		employeePayrollService.addEmployeeToPayroll("Bill",50000.0,LocalDate.now(),'M');
 		boolean result=employeePayrollService.checkEmployeePayrollInSyncWithDB("Bill");
 		Assert.assertTrue(result);
 		
-		/*UC8*/
+	/*UC-8*/
+		/*UC-8  Refactor*/
+
 		
-		/*UC9*/
 	}
 }

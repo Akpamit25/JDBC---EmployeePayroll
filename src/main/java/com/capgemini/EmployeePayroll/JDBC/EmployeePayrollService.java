@@ -1,5 +1,6 @@
 package com.capgemini.EmployeePayroll.JDBC;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.*;
 import databaseConnection.*;
@@ -121,7 +122,7 @@ public class EmployeePayrollService {
 		return genderToAverageSalaryMap;
 	}
 
-	public void addEmployeeToPayroll(String name, double salary, LocalDate joiningDate, char gender) {
+	public void addEmployeeToPayroll(String name, double salary, LocalDate joiningDate, char gender) throws PayrollSystemException, SQLException {
 		employeePayrollList.add(employeePayrollDBService.addEmployeeToPayroll(name,salary,joiningDate,gender));	
 	}
 }
